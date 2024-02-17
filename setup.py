@@ -257,7 +257,7 @@ WantedBy=graphical.target
 alsactl --file /home/fabianrohr/.config/asound.state restore
 
 # turn on speakers
-node '{self.pianoteq_dir}/tuya/' tuya.js on
+node '{self.pianoteq_dir}/tuya/tuya.js' on
 """
         with open(self.start_wifi_sh_path, 'w') as fp:
             fp.write(start_sh_content)
@@ -301,7 +301,7 @@ WantedBy=multi-user.target
         notify('Creating shutdown.sh for speakers ...')
         start_sh_content = f"""#!/bin/bash
 # turn off speakers
-node '{self.pianoteq_dir}/tuya/' tuya.js off
+node '{self.pianoteq_dir}/tuya/tuya.js' off
 """
         with open(self.shutdown_sh_path, 'w') as fp:
             fp.write(start_sh_content)
