@@ -346,7 +346,7 @@ WantedBy=multi-user.target
         notify('Creating detect_shutdown.sh for speakers ...')
         start_sh_content = f"""#!/bin/bash
 # check every 5s for power outage, trigger shutdown if on battery
-sudo python3 '{self.pianoteq_dir}/pld.py'
+sudo python3 '{self.pianoteq_dir}/detect_power_outage.py'
 """
         with open(self.detect_shutdown_sh_path, 'w') as fp:
             fp.write(start_sh_content)
