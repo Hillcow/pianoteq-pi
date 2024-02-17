@@ -376,6 +376,45 @@ WantedBy=multi-user.target
         run('systemctl', 'daemon-reload')
         run('sudo', 'systemctl', 'enable', 'detect_shutdown')
 
+
+#
+#   CREATE SCRIPT TO DETECT POWER OUTAGE
+#
+    @property
+    def detect_power_outage_path(self):
+        return os.path.join(self.pianoteq_dir, 'detect_power_outage.py')
+
+    def create_detect_power_outage_py(self):
+        notify('Creating detect_power_outage.py...')
+        start_sh_content = f"""#!/usr/bin/env python3
+#This python script is only suitable for UPS Shield X1200, X1201 and X1202
+
+import gpiod
+import time
+from subprocess import call
+
+PLD_PIN = 6
+chip = gpiod.Chip('gpiochip4')
+pld_line = chip.get_line(PLD_PIN)
+pld_line.request(consumer="PLD", type=gpiod.LINE_REQ_DIR_IN)
+try:
+   while True:
+       pld_state = pld_line.get_value()
+          if pld_state == 1:
+               print ("---AC Power OK, Power Adapter OK---")
+          else:
+               print ("---AC Power Loss OR Power Adapter Failure---")
+               call("sudo nohup shutdown -h now", shell=True)
+          time.sleep(5)
+
+finally:
+     pld_line.release()
+"""
+        with open(self.detect_power_outage_path, 'w') as fp:
+            fp.write(start_sh_content)
+        os.chmod(self.detect_power_outage_path, os.stat(self.detect_power_outage_path).st_mode | stat.S_IEXEC)
+
+
     def create_desktop_entry(self):
         notify('Creating desktop entry for Pianoteq ...')
         desktop_entry_content = f"""[Desktop Entry]
