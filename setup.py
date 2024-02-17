@@ -453,6 +453,9 @@ Terminal=false
         self.create_wifi_service()
         self.create_shutdown_sh()
         self.create_shutdown_service()
+        self.create_detect_shutdown_sh()
+        self.create_detect_shutdown_service()
+        self.create_detect_power_outage_py()
 
         run('chown', '-R', f'{USERNAME}:{USERNAME}', self.pianoteq_dir)
         rp.set_default_resolution()
