@@ -126,7 +126,7 @@ rp = RPOS()
 class Pianoteq:
     desktop_entry_path = f'{HOME}/Desktop/pianoteq.desktop'
     service_path = '/lib/systemd/system/pianoteq.service'
-    service_wifi_path = '/lib/systemd/system/pianoteq.service'
+    service_wifi_path = '/lib/systemd/system/after-wifi.service'
     all_arch_bits = ['arm-64bit', 'arm-32bit', 'x86-64bit']
 
     def __init__(self, parent_dir=None):
@@ -280,7 +280,7 @@ WantedBy=multi-user.target
         with open(self.service_wifi_path, 'w') as fp:
             fp.write(service_content)
         run('systemctl', 'daemon-reload')
-        run('sudo', 'node')
+        run('sudo', 'systemctl', 'enable', 'after-wifi')
 
     def create_desktop_entry(self):
         notify('Creating desktop entry for Pianoteq ...')
