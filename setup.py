@@ -126,6 +126,7 @@ rp = RPOS()
 class Pianoteq:
     desktop_entry_path = f'{HOME}/Desktop/pianoteq.desktop'
     service_path = '/lib/systemd/system/pianoteq.service'
+    service_wifi_path = '/lib/systemd/system/pianoteq.service'
     all_arch_bits = ['arm-64bit', 'arm-32bit', 'x86-64bit']
 
     def __init__(self, parent_dir=None):
@@ -238,6 +239,49 @@ WantedBy=graphical.target
         run('systemctl', 'daemon-reload')
         run('sudo', 'systemctl', 'enable', 'pianoteq')
 
+    @property
+    def start_wifi_sh_path(self):
+        return os.path.join(self.pianoteq_dir, 'start-wifi.sh')
+
+    def create_start_wifi_sh(self):
+        notify('Creating start-wifi.sh for speakers ...')
+        start_sh_content = f"""#!/bin/bash
+# restore audio interface volume
+alsactl --file /home/fabianrohr/.config/asound.state restore
+
+# turn on speakers
+{self.pianoteq_dir}/tuya/node tuya.js on
+"""
+        with open(self.start_wifi_sh_path, 'w') as fp:
+            fp.write(start_sh_content)
+        os.chmod(self.start_wifi_sh_path, os.stat(self.start_wifi_sh_path).st_mode | stat.S_IEXEC)
+
+    def create_wifi_service(self):
+        notify('Creating service for speakers ...')
+        service_content = f"""[Unit]
+Description=Start Scripts as soon as wifi has connected
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStartPre=/bin/sh -c 'until ping -c1 google.com; do sleep 1; done;'
+User={USERNAME}
+Environment=DISPLAY=:0
+Environment=XAUTHORITY={HOME}/.Xauthority
+ExecStart='{self.pianoteq_dir}/start-wifi.sh'
+Restart=on-failure
+RestartSec=2s
+KillMode=control-group
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target
+"""
+        with open(self.service_wifi_path, 'w') as fp:
+            fp.write(service_content)
+        run('systemctl', 'daemon-reload')
+        run('sudo', 'node')
+
     def create_desktop_entry(self):
         notify('Creating desktop entry for Pianoteq ...')
         desktop_entry_content = f"""[Desktop Entry]
@@ -270,6 +314,7 @@ Terminal=false
                 'Download: https://www.modartt.com/user_area#downloads'
             )
         self.create_start_sh()
+        self.create_start_wifi_sh()
         self.create_desktop_entry()
         self.create_service()
         run('chown', '-R', f'{USERNAME}:{USERNAME}', self.pianoteq_dir)
