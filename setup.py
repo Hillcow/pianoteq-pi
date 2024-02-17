@@ -399,7 +399,7 @@ pld_line = chip.get_line(PLD_PIN)
 pld_line.request(consumer="PLD", type=gpiod.LINE_REQ_DIR_IN)
 try:
    while True:
-       pld_state = pld_line.get_value()
+          pld_state = pld_line.get_value()
           if pld_state == 1:
                print ("---AC Power OK, Power Adapter OK---")
           else:
