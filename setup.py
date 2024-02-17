@@ -184,6 +184,9 @@ class Pianoteq:
         self.pianoteq_dir = os.path.join(self.parent_dir, root_dir)
         return self.pianoteq_dir
 
+#
+#   START (DIRECT)
+#
     @property
     def start_sh_path(self):
         return os.path.join(self.pianoteq_dir, 'start.sh')
@@ -239,6 +242,9 @@ WantedBy=graphical.target
         run('systemctl', 'daemon-reload')
         run('sudo', 'systemctl', 'enable', 'pianoteq')
 
+#
+#   STARTUP (AFTER WIFI CONNECTION)
+#
     @property
     def start_wifi_sh_path(self):
         return os.path.join(self.pianoteq_dir, 'start-wifi.sh')
@@ -250,7 +256,7 @@ WantedBy=graphical.target
 alsactl --file /home/fabianrohr/.config/asound.state restore
 
 # turn on speakers
-{self.pianoteq_dir}/tuya/node tuya.js on
+node '{self.pianoteq_dir}/tuya/' tuya.js on
 """
         with open(self.start_wifi_sh_path, 'w') as fp:
             fp.write(start_sh_content)
@@ -264,6 +270,7 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+Type=oneshot
 ExecStartPre=/bin/sh -c 'until ping -c1 google.com; do sleep 1; done;'
 User={USERNAME}
 Environment=DISPLAY=:0
@@ -281,6 +288,50 @@ WantedBy=multi-user.target
             fp.write(service_content)
         run('systemctl', 'daemon-reload')
         run('sudo', 'systemctl', 'enable', 'after-wifi')
+
+#
+#   SHUTDOWN
+#
+    @property
+    def shutdown_sh_path(self):
+        return os.path.join(self.pianoteq_dir, 'shutdown.sh')
+
+    def create_shutdown_sh(self):
+        notify('Creating shutdown.sh for speakers ...')
+        start_sh_content = f"""#!/bin/bash
+# turn off speakers
+node '{self.pianoteq_dir}/tuya/' tuya.js off
+"""
+        with open(self.shutdown_sh_path, 'w') as fp:
+            fp.write(start_sh_content)
+        os.chmod(self.shutdown_sh_path, os.stat(self.shutdown_sh_path).st_mode | stat.S_IEXEC)
+
+    def create_shutdown_service(self):
+        notify('Creating shutdown service for speakers ...')
+        service_content = f"""[Unit]
+Description=Start Scripts as soon as shutdown is initiated
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User={USERNAME}
+Environment=DISPLAY=:0
+Environment=XAUTHORITY={HOME}/.Xauthority
+ExecStop='{self.pianoteq_dir}/shutdown.sh'
+Restart=on-failure
+RestartSec=2s
+KillMode=control-group
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target
+"""
+        with open(self.service_wifi_path, 'w') as fp:
+            fp.write(service_content)
+        run('systemctl', 'daemon-reload')
+        run('sudo', 'systemctl', 'enable', 'shutdown')
 
     def create_desktop_entry(self):
         notify('Creating desktop entry for Pianoteq ...')
@@ -318,6 +369,9 @@ Terminal=false
         self.create_desktop_entry()
         self.create_start_wifi_sh()
         self.create_wifi_service()
+        self.create_shutdown_sh()
+        self.create_shutdown_service()
+
         run('chown', '-R', f'{USERNAME}:{USERNAME}', self.pianoteq_dir)
         rp.set_default_resolution()
         rp.disable_smsc95xx_turbo_mode()
