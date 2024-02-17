@@ -128,6 +128,7 @@ class Pianoteq:
     service_path = '/lib/systemd/system/pianoteq.service'
     service_wifi_path = '/lib/systemd/system/after-wifi.service'
     service_shutdown_path = '/lib/systemd/system/shutdown.service'
+    service_detect_shutdown_path = '/lib/systemd/system/detect_shutdown.service'
     all_arch_bits = ['arm-64bit', 'arm-32bit', 'x86-64bit']
 
     def __init__(self, parent_dir=None):
@@ -333,6 +334,47 @@ WantedBy=multi-user.target
             fp.write(service_content)
         run('systemctl', 'daemon-reload')
         run('sudo', 'systemctl', 'enable', 'shutdown')
+
+#
+#   DETECT POWER OUTAGE, TRIGGER SHUTDOWN
+#
+    @property
+    def detect_shutdown_sh_path(self):
+        return os.path.join(self.pianoteq_dir, 'detect_shutdown.sh')
+
+    def create_detect_shutdown_sh(self):
+        notify('Creating detect_shutdown.sh for speakers ...')
+        start_sh_content = f"""#!/bin/bash
+# check every 5s for power outage, trigger shutdown if on battery
+sudo python3 '{self.pianoteq_dir}/pld.py'
+"""
+        with open(self.detect_shutdown_sh_path, 'w') as fp:
+            fp.write(start_sh_content)
+        os.chmod(self.detect_shutdown_sh_path, os.stat(self.detect_shutdown_sh_path).st_mode | stat.S_IEXEC)
+
+    def create_detect_shutdown_service(self):
+        notify('Creating detect_shutdown service ...')
+        service_content = f"""[Unit]
+Description=Execute script that calls shutdown on power outage
+After=network-online.target
+
+[Service]
+User={USERNAME}
+Environment=DISPLAY=:0
+Environment=XAUTHORITY={HOME}/.Xauthority
+ExecStart='{self.pianoteq_dir}/detect_shutdown.sh' --headless
+Restart=on-failure
+RestartSec=5s
+KillMode=control-group
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target
+"""
+        with open(self.service_detect_shutdown_path, 'w') as fp:
+            fp.write(service_content)
+        run('systemctl', 'daemon-reload')
+        run('sudo', 'systemctl', 'enable', 'detect_shutdown')
 
     def create_desktop_entry(self):
         notify('Creating desktop entry for Pianoteq ...')
