@@ -275,12 +275,10 @@ After=network-online.target
 Type=oneshot
 ExecStartPre=/bin/sh -c 'until ping -c1 google.com; do sleep 1; done;'
 User={USERNAME}
-Environment=DISPLAY=:0
-Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStart='{self.pianoteq_dir}/start-wifi.sh'
 Restart=on-failure
 RestartSec=2s
-KillMode=control-group-start-wifi
+KillMode=control-group
 TimeoutSec=infinity
 
 [Install]
@@ -319,12 +317,10 @@ After=network-online.target
 Type=oneshot
 RemainAfterExit=yes
 User={USERNAME}
-Environment=DISPLAY=:0
-Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStop='{self.pianoteq_dir}/shutdown.sh'
 Restart=on-failure
 RestartSec=2s
-KillMode=control-group-shutdown
+KillMode=control-group
 TimeoutSec=infinity
 
 [Install]
@@ -360,12 +356,10 @@ After=network-online.target
 
 [Service]
 User={USERNAME}
-Environment=DISPLAY=:0
-Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStart='{self.pianoteq_dir}/detect_shutdown.sh' --headless
 Restart=on-failure
 RestartSec=5s
-KillMode=control-group-detect-shutdown
+KillMode=control-group
 TimeoutSec=infinity
 
 [Install]
