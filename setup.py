@@ -198,7 +198,7 @@ class Pianoteq:
         start_sh_content = f"""#!/bin/bash
 
 exec_path="{self.pianoteq_dir}/{rp.arch_bit}/Pianoteq {PIANOTEQ_VERSION}{self.edition_suffix}"
-base_args="--multicore max --do-not-block-screensaver --midimapping TouchOSC"
+base_args="--multicore max --do-not-block-screensaver"
 
 base_cmd=("${{exec_path}}" $base_args)
 
@@ -280,7 +280,7 @@ Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStart='{self.pianoteq_dir}/start-wifi.sh'
 Restart=on-failure
 RestartSec=2s
-KillMode=control-group
+KillMode=control-group-start-wifi
 TimeoutSec=infinity
 
 [Install]
@@ -324,7 +324,7 @@ Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStop='{self.pianoteq_dir}/shutdown.sh'
 Restart=on-failure
 RestartSec=2s
-KillMode=control-group
+KillMode=control-group-shutdown
 TimeoutSec=infinity
 
 [Install]
@@ -365,7 +365,7 @@ Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStart='{self.pianoteq_dir}/detect_shutdown.sh' --headless
 Restart=on-failure
 RestartSec=5s
-KillMode=control-group
+KillMode=control-group-detect-shutdown
 TimeoutSec=infinity
 
 [Install]
