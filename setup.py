@@ -127,6 +127,7 @@ class Pianoteq:
     desktop_entry_path = f'{HOME}/Desktop/pianoteq.desktop'
     service_path = '/lib/systemd/system/pianoteq.service'
     service_wifi_path = '/lib/systemd/system/after-wifi.service'
+    service_shutdown_path = '/lib/systemd/system/shutdown.service'
     all_arch_bits = ['arm-64bit', 'arm-32bit', 'x86-64bit']
 
     def __init__(self, parent_dir=None):
@@ -328,7 +329,7 @@ TimeoutSec=infinity
 [Install]
 WantedBy=multi-user.target
 """
-        with open(self.service_wifi_path, 'w') as fp:
+        with open(self.service_shutdown_path, 'w') as fp:
             fp.write(service_content)
         run('systemctl', 'daemon-reload')
         run('sudo', 'systemctl', 'enable', 'shutdown')
