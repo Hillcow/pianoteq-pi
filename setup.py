@@ -224,7 +224,7 @@ sudo cpufreq-set -r -g ondemand
         notify('Creating service for Pianoteq ...')
         service_content = f"""[Unit]
 Description=Start Pianoteq {PIANOTEQ_VERSION}{self.edition_suffix}
-After=graphical.target
+After=network-online.target
 
 [Service]
 User={USERNAME}
