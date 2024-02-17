@@ -314,9 +314,10 @@ Terminal=false
                 'Download: https://www.modartt.com/user_area#downloads'
             )
         self.create_start_sh()
-        self.create_start_wifi_sh()
-        self.create_desktop_entry()
         self.create_service()
+        self.create_desktop_entry()
+        self.create_start_wifi_sh()
+        self.create_wifi_service()
         run('chown', '-R', f'{USERNAME}:{USERNAME}', self.pianoteq_dir)
         rp.set_default_resolution()
         rp.disable_smsc95xx_turbo_mode()
