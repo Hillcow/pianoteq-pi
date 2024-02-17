@@ -323,7 +323,7 @@ Environment=DISPLAY=:0
 Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStop='{self.pianoteq_dir}/shutdown.sh'
 Restart=on-failure
-RestartSec=2s
+RestartSec=1s
 KillMode=control-group
 TimeoutSec=infinity
 
@@ -364,7 +364,7 @@ Environment=DISPLAY=:0
 Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStart='{self.pianoteq_dir}/detect_shutdown.sh' --headless
 Restart=on-failure
-RestartSec=5s
+RestartSec=2s
 KillMode=control-group
 TimeoutSec=infinity
 
@@ -404,6 +404,7 @@ try:
                print ("---AC Power OK, Power Adapter OK---")
           else:
                print ("---AC Power Loss OR Power Adapter Failure---")
+               call("node '{self.pianoteq_dir}/tuya/tuya.js' off", shell=True)
                call("sudo nohup shutdown -h now", shell=True)
           time.sleep(5)
 
