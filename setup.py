@@ -339,7 +339,7 @@ Environment=DISPLAY=:0
 Environment=XAUTHORITY={HOME}/.Xauthority
 ExecStop='{self.pianoteq_dir}/shutdown.sh'
 Restart=on-failure
-RestartSec=1s
+RestartSec=2s
 KillMode=control-group
 TimeoutSec=infinity
 
@@ -421,7 +421,6 @@ try:
                time.sleep(2)
           else:
                print ("---AC Power Loss OR Power Adapter Failure---")
-               call("'{self.pianoteq_dir}/shutdown.sh'", shell=True)
                call("sudo nohup shutdown -h now", shell=True)
                break
 
