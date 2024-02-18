@@ -257,8 +257,16 @@ WantedBy=graphical.target
 # restore audio interface volume
 alsactl --file /home/fabianrohr/.config/asound.state restore
 
-# turn on speakers
-node '{self.pianoteq_dir}/tuya/tuya.js' on
+# turn on speakers until successful
+unset i; i=0
+while ! node '{self.pianoteq_dir}/tuya/tuya.js' on; do 
+    ((i++))
+    if (( "$i" >= 20 )); then
+        echo "abort..."; break
+    fi
+    echo "try $i unsuccesful. repeat..."
+    sleep .1s
+done
 """
         with open(self.start_wifi_sh_path, 'w') as fp:
             fp.write(start_sh_content)
@@ -301,8 +309,16 @@ WantedBy=multi-user.target
     def create_shutdown_sh(self):
         notify('Creating shutdown.sh for speakers ...')
         start_sh_content = f"""#!/bin/bash
-# turn off speakers
-node '{self.pianoteq_dir}/tuya/tuya.js' off
+# turn off speakers until successful
+unset i; i=0
+while ! node '{self.pianoteq_dir}/tuya/tuya.js' off; do 
+    ((i++))
+    if (( "$i" >= 20 )); then
+        echo "abort..."; break
+    fi
+    echo "try $i unsuccesful. repeat..."
+    sleep .1s
+done
 """
         with open(self.shutdown_sh_path, 'w') as fp:
             fp.write(start_sh_content)
@@ -345,7 +361,7 @@ WantedBy=multi-user.target
     def create_detect_shutdown_sh(self):
         notify('Creating detect_shutdown.sh for speakers ...')
         start_sh_content = f"""#!/bin/bash
-# check every 5s for power outage, trigger shutdown if on battery
+# check for power outage, trigger shutdown if on battery
 sudo python3 '{self.pianoteq_dir}/detect_power_outage.py'
 """
         with open(self.detect_shutdown_sh_path, 'w') as fp:
@@ -404,9 +420,8 @@ try:
                print ("---AC Power OK, Power Adapter OK---")
           else:
                print ("---AC Power Loss OR Power Adapter Failure---")
-               call("node '{self.pianoteq_dir}/tuya/tuya.js' off", shell=True)
                call("sudo nohup shutdown -h now", shell=True)
-          time.sleep(5)
+          time.sleep(2)
 
 finally:
      pld_line.release()
