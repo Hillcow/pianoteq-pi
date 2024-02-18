@@ -13,13 +13,7 @@ const devices = [
 
 // Find device on network
 devices.forEach((device, index) => {
-  try {
     turnOnOff(device, index)
-  } catch (error) {
-    console.error("hihi");
-    // Expected output: ReferenceError: nonExistentFunction is not defined
-    // (Note: the exact output may be browser-dependent)
-  }
 })
 
 function turnOnOff(device, index) {
@@ -41,13 +35,16 @@ function turnOnOff(device, index) {
   
   device.on('error', error => {
     console.log('Error!', error);
-    if (error.includes("ECONNRESET")) {
+    throw new Error('error...');
+    /*
+    if (String(error).includes("ECONNRESET")) {
       console.log('lets try something')
       setTimeout(() => {
         console.log("wait repeat")
         turnOnOff(device, index)
-      }, 5000)
+      }, 100)
     }
+    */
   });
   
   device.on('data', data => {

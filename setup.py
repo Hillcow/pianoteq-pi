@@ -258,7 +258,7 @@ WantedBy=graphical.target
 alsactl --file /home/fabianrohr/.config/asound.state restore
 
 # turn on speakers until successful
-unset i; i=0
+i=0
 while ! node '{self.pianoteq_dir}/tuya/tuya.js' on; do 
     ((i++))
     if (( "$i" >= 20 )); then
@@ -310,7 +310,7 @@ WantedBy=multi-user.target
         notify('Creating shutdown.sh for speakers ...')
         start_sh_content = f"""#!/bin/bash
 # turn off speakers until successful
-unset i; i=0
+i=0
 while ! node '{self.pianoteq_dir}/tuya/tuya.js' off; do 
     ((i++))
     if (( "$i" >= 20 )); then
@@ -418,10 +418,12 @@ try:
           pld_state = pld_line.get_value()
           if pld_state == 1:
                print ("---AC Power OK, Power Adapter OK---")
+               time.sleep(2)
           else:
                print ("---AC Power Loss OR Power Adapter Failure---")
+               call("'{self.pianoteq_dir}/shutdown.sh'", shell=True)
                call("sudo nohup shutdown -h now", shell=True)
-          time.sleep(2)
+               break
 
 finally:
      pld_line.release()
