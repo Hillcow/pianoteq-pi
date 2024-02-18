@@ -45,8 +45,8 @@ if os.getuid():
 
 
 class RPOS:
-    cmdline_path = '/boot/cmdline.txt'
-    config_path = '/boot/config.txt'
+    cmdline_path = '/boot/firmware/cmdline.txt'
+    config_path = '/boot/firmware/config.txt'
     security_limits_path = '/etc/security/limits.conf'
 
     def __init__(self):
