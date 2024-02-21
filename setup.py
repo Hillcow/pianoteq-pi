@@ -430,8 +430,6 @@ finally:
             fp.write(start_sh_content)
         os.chmod(self.detect_power_outage_path, os.stat(self.detect_power_outage_path).st_mode | stat.S_IEXEC)
 
-    def 
-
     def create_desktop_entry(self):
         notify('Creating desktop entry for Pianoteq ...')
         desktop_entry_content = f"""[Desktop Entry]
