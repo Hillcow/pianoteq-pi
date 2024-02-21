@@ -260,7 +260,7 @@ WantedBy=graphical.target
 alsactl --file /home/fabianrohr/.config/asound.state restore
 
 # wait
-sleep 15s
+sleep 5s
 
 # turn on speakers until successful
 i=0
