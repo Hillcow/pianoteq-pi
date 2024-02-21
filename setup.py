@@ -259,7 +259,7 @@ alsactl --file /home/fabianrohr/.config/asound.state restore
 
 # turn on speakers until successful
 i=0
-while ! node '{self.pianoteq_dir}/tuya/tuya.js' on; do 
+while ! curl http://192.168.178.91/cm\?cmnd\=Power%20On; do 
     ((i++))
     if (( "$i" >= 20 )); then
         echo "abort..."; break
@@ -281,7 +281,6 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c 'until ping -c1 google.com; do sleep 1; done;'
 User={USERNAME}
 Environment=DISPLAY=:0
 Environment=XAUTHORITY={HOME}/.Xauthority
@@ -311,7 +310,7 @@ WantedBy=multi-user.target
         start_sh_content = f"""#!/bin/bash
 # turn off speakers until successful
 i=0
-while ! node '{self.pianoteq_dir}/tuya/tuya.js' off; do 
+while ! curl http://192.168.178.91/cm\?cmnd\=Power%20Off; do 
     ((i++))
     if (( "$i" >= 20 )); then
         echo "abort..."; break
@@ -431,6 +430,7 @@ finally:
             fp.write(start_sh_content)
         os.chmod(self.detect_power_outage_path, os.stat(self.detect_power_outage_path).st_mode | stat.S_IEXEC)
 
+    def 
 
     def create_desktop_entry(self):
         notify('Creating desktop entry for Pianoteq ...')
@@ -466,10 +466,10 @@ Terminal=false
         self.create_start_sh()
         self.create_service()
         self.create_desktop_entry()
-        self.create_start_wifi_sh()
-        self.create_wifi_service()
-        self.create_shutdown_sh()
-        self.create_shutdown_service()
+        #self.create_start_wifi_sh()
+        #self.create_wifi_service()
+        #self.create_shutdown_sh()
+        #self.create_shutdown_service()
         self.create_detect_shutdown_sh()
         self.create_detect_shutdown_service()
         self.create_detect_power_outage_py()
@@ -507,13 +507,15 @@ def number_menu(callbacks: list):
 
 
 def ask_to_overclock_cpu():
-    oc_3000_5 = lambda: rp.overclock_cpu(3000, 50000)
+    oc_2800_5 = lambda: rp.overclock_cpu(2800, 50000)
+    oc_2600_5 = lambda: rp.overclock_cpu(2600, 50000)
     oc_2000_6 = lambda: rp.overclock_cpu(2000, 60000)
     oc_1750_2 = lambda: rp.overclock_cpu(1750, 20000)
     cancel_oc = lambda: rp.overclock_cpu()
-    notify('Would you like to overclock the CPU of your Raspberry Pi?')
+    notify('Would you like to overclock the CPU of your Raspberry Pi? Default of Pi5 is 2400 MHz.')
     return number_menu([
-        ('Overclock to 3000 MHz @ 5th voltage level (recommended for Pi5)', oc_3000_5),
+        ('Overclock to 2800 MHz @ 5th voltage level (works with many Pi5)', oc_2800_5),
+        ('Overclock to 2600 MHz @ 5th voltage level (works with most Pi5)', oc_2600_5),
         ('Overclock to 2000 MHz @ 6th voltage level', oc_2000_6),
         ('Overclock to 1750 MHz @ 2nd voltage level', oc_1750_2),
         ('Restore back to the stock CPU frequency and voltage', cancel_oc),
