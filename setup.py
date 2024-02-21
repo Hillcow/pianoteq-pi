@@ -255,7 +255,12 @@ WantedBy=graphical.target
         notify('Creating start-wifi.sh for speakers ...')
         start_sh_content = f"""#!/bin/bash
 # restore audio interface volume
+# alsamixer => f6 => increase volume to max
+# alsactl --file ~/.config/asound.state store
 alsactl --file /home/fabianrohr/.config/asound.state restore
+
+# wait
+sleep 5s
 
 # turn on speakers until successful
 i=0
